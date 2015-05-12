@@ -4,10 +4,10 @@
 * Backend: NodeJS 
 * Frontend: HTML
 
-### Ha ursprungsappen device-orientation.se som startsida
-### Fixa funktionalitet på startsidan som inte funkar i nuläget
-### Lägga till en knapp "Go to my position"
-### Lägga till några knappar/navigering till vyer för "digital tourism" och "Plan your roadtrip/route" samt en "about"- vy
+#### Ha ursprungsappen device-orientation.se som startsida
+#### Fixa funktionalitet på startsidan som inte funkar i nuläget
+#### Lägga till en knapp "Go to my position"
+#### Lägga till några knappar/navigering till vyer för "digital tourism" och "Plan your roadtrip/route" samt en "about"- vy
 
 ### Vy1 - Startsida: 
 * Möjlighet att söka efter olika platser att ta sig till
