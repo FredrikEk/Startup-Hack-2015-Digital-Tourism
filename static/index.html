@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Street View service</title>
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+      .controls {
+        margin-top: 16px;
+        border: 1px solid transparent;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        height: 32px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      }
+
+      #pac-input {
+        background-color: #fff;
+        padding: 0 11px 0 13px;
+        width: 40%;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        text-overflow: ellipsis;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+        margin-left: -1px;
+        padding-left: 14px;  /* Regular padding-left + 1. */
+        width: 41%;
+      }
+
+      .pac-container {
+        font-family: Roboto;
+      }
+
+      #type-selector {
+        color: #fff;
+        background-color: #4d90fe;
+        padding: 5px 11px 0px 11px;
+      }
+
+      #type-selector label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+  }
+
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
+    <script src="js/fulltilt.js"></script>
+    
+    <script>
+    var map;
+    var panorama;
+    function initialize() {
+      var fenway = new google.maps.LatLng(42.345573, -71.098326);
+      var mapOptions = {
+        center: fenway,
+        zoom: 14 
+      };
+      
+
+      map = new google.maps.Map(
+          document.getElementById('map-canvas'), mapOptions);
+      var panoramaOptions = {
+        position: fenway,
+        pov: {
+          heading: 34,
+          pitch: 30
+        }
+      };
+     
+      
+      var defaultBounds = new google.maps.LatLngBounds(
+      new google.maps.LatLng(42.345573, -71.098326),
+      new google.maps.LatLng(42.345573, -71.098326));
+      map.fitBounds(defaultBounds);
+      
+      panorama = new google.maps.StreetViewPanorama(document.getElementById('pano'), panoramaOptions);
+      map.setStreetView(panorama);
+      
+  // Create the search box and link it to the UI element.
+  var input = /** @type {HTMLInputElement} */(
+      document.getElementById('pac-input'));
+  panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
+
+  var searchBox = new google.maps.places.SearchBox(
+    /** @type {HTMLInputElement} */(input));
+
+  // [START region_getplaces]
+  // Listen for the event fired when the user selects an item from the
+  // pick list. Retrieve the matching places for that item.
+  google.maps.event.addListener(searchBox, 'places_changed', function() {
+    var places = searchBox.getPlaces();
+
+    if (places.length == 0) {
+      return;
+    }
+
+    // For each place, get the icon, place name, and location.
+
+    var bounds = new google.maps.LatLngBounds();
+    for (var i = 0, place; place = places[i]; i++) {
+      var image = {
+        url: place.icon,
+        size: new google.maps.Size(71, 71),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(17, 34),
+        scaledSize: new google.maps.Size(25, 25)
+      };
+
+
+      bounds.extend(place.geometry.location);
+      
+    }
+
+    map.fitBounds(bounds);
+    panorama.setPosition(places[0].geometry.location);
+      
+  });
+  // [END region_getplaces]
+
+  // Bias the SearchBox results towards places that are within the bounds of the
+  // current map's viewport.
+  google.maps.event.addListener(map, 'bounds_changed', function() {
+    var bounds = map.getBounds();
+    searchBox.setBounds(bounds);
+  });
+
+    }
+
+    google.maps.event.addDomListener(window, 'load', initialize);
+    
+    function plotMaps(headingXaxis, headingYaxis) {
+      var panorama = map.getStreetView();
+      panorama.setPov({
+        heading: headingXaxis,
+        pitch: headingYaxis,
+        zoom: 1
+      });
+    }
+    
+    </script>
+    <script>
+    // Create a new FULLTILT Promise for e.g. *compass*-based deviceorientation data
+    var promise = new FULLTILT.getDeviceOrientation({ 'type': 'world' });
+
+    // FULLTILT.DeviceOrientation instance placeholder
+    var deviceOrientation;
+
+    promise
+      .then(function(controller) {
+        // Store the returned FULLTILT.DeviceOrientation object
+        deviceOrientation = controller;
+      })
+      .catch(function(message) {
+        console.error(message);
+
+        // Optionally set up fallback controls...
+        // initManualControls();
+      });
+
+    var orientationQuat = new FULLTILT.Quaternion();
+    
+    
+        var worldQuat = new FULLTILT.Quaternion( - Math.sqrt( 0.5 ), 0, 0 , Math.sqrt( 0.5 ) );
+    
+      
+    (function draw() {
+
+        
+        
+      // If we have a valid FULLTILT.DeviceOrientation object then use it
+      if (deviceOrientation) {
+        
+    
+        // Obtain the *screen-adjusted* normalized device rotation
+        // as Quaternion, Rotation Matrix and Euler Angles objects
+        // from our FULLTILT.DeviceOrientation object
+        //var matrix = deviceOrientation.getScreenAdjustedMatrix();
+        //var euler = deviceOrientation.getScreenAdjustedEuler();
+        //euler.rotateY(-euler.gamma* (Math.PI / 180));
+        
+        var euler = deviceOrientation.getScreenAdjustedEuler();
+        //euler.rotateY(-euler.gamma* (Math.PI / 180));
+        
+        
+        var quat = new FULLTILT.Quaternion();
+        quat.setFromEuler(euler);
+    
+        quat.multiply( worldQuat );
+        
+        euler.setFromQuaternion(quat);
+        
+        
+        // Do something with our quaternion, matrix, euler objects...
+        //document.getElementById('eulerTest').innerHTML = euler.alpha;
+        //document.getElementById('matrixTest').innerHTML = euler.beta;
+        //document.getElementById('quaterionTest').innerHTML = euler.gamma;
+        plotMaps(-euler.alpha, euler.beta);
+        //console.debug(euler);
+        //console.debug(matrix);
+        //console.debug(euler);
+
+      }
+
+      // Execute function on each browser animation frame
+      requestAnimationFrame(draw);
+
+    })();
+  </script>
+    <style>
+      #target {
+        width: 345px;
+      }
+    </style>
+  </head>
+  <body>
+   
+    <div id="pano" style="width:100%; height:100%; position: absolute; z-index: 1"></div>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="map-canvas" style="width:25%; height:25%; position: absolute; z-index: 2; right: 0px; bottom: 0px"></div>
+    
+  </body>
+</html>
