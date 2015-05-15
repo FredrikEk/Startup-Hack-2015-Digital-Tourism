@@ -144,8 +144,8 @@
 				height: window.innerHeight,
 				zoom: 2,
 				use_lookat: true,
-				distance_between_points: 5,
-				max_points: 100,
+				distance_between_points: 1,
+				max_points: 1000,
 				elevation: _elevation
 			});
 			
@@ -235,8 +235,8 @@
 			var gui = new dat.GUI();
 
 			var o = {
-				distance_between_points:10, 
-				max_points:100, 
+				distance_between_points:1, 
+				max_points:1000, 
 				fov: 80, 
 				elevation:Math.floor(_elevation), 
 				tilt:0, 
@@ -309,12 +309,12 @@
 
 			var parameters = gui.addFolder('parameters');
 
-			var distance_between_points_control = parameters.add(o, 'distance_between_points', 5, 100);
+			var distance_between_points_control = parameters.add(o, 'distance_between_points', 1, 100);
 			distance_between_points_control.onChange(function(value) {
 				hyperlapse.setDistanceBetweenPoint(value);
 			});
 
-			var max_points = parameters.add(o, 'max_points', 10, 300);
+			var max_points = parameters.add(o, 'max_points', 10, 1000);
 			max_points.onChange(function(value) {
 				hyperlapse.setMaxPoints(value);
 			});
