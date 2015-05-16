@@ -268,16 +268,16 @@
 	<script>
 		
     $("#startpage").click(function() {
-      window.location.href = window.location.href;
+      window.location.href = "http://" + window.location.hostname + "/test/static";
     });
 
-		$("#myRoadtrip").click(function() {
-			window.location.href = window.location.href + "/dev2/examples/viewer.html";
-		});
+    $("#myRoadtrip").click(function() {
+      window.location.href = "http://" + window.location.hostname + "/test/static/dev2/examples/viewer.html";
+    });
 
     $("#digitalTourism").click(function() {
       alert("Not implemented yet");
-      window.location.href = window.location.href + "/dev2/examples/viewer.html";
+      window.location.href = "http://" + window.location.hostname + "/test/static/dev2/examples/viewer.html";
     });
 		
 		$("#myPosition").click(function() {
