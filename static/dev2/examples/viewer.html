@@ -323,6 +323,7 @@
 				position_x:0,
 				position_y:0,
 				use_lookat:true,
+				Location: "Chalmers",
 				screen_width: window.innerWidth,
 				screen_height: window.innerHeight,
 				generate:function(){
@@ -375,11 +376,16 @@
 							changeHash();
 						});
 					});
+				},
+				Search: function() {
+					findAddress(this.Location);
 				}
 			};
 
 			//var browselocation = gui.addFolder('Browse Location');
 			 
+			 gui.add(o, "Location");
+			 gui.add(o, "Search");
 
 			var parameters = gui.addFolder('parameters');
 
