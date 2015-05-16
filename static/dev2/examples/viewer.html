@@ -505,6 +505,7 @@
 <script>
 
 	var play = true;
+	
 	$("#startpage").click(function() {
       window.location.href = "http://" + window.location.hostname + "/test/static";
     });
@@ -545,7 +546,7 @@
 		  alert("Your browser doesn't support geolocation. We've placed you in Siberia.");
 		}
 	  }
-	$("play-pause-toggle").click(function() {
+	$("#play-pause-toggle").click(function() {
 		if(play) {
 			hyperlapse.pause();
 			$("#play-pause-toggle").html('<i class="fa fa-play fa-4x"></i>');
