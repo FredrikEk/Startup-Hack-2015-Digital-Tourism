@@ -268,7 +268,7 @@
 	<script>
 		
     $("#startpage").click(function() {
-      location.replace(window.location.hostname + "/static");
+      window.location.href = "http://" + window.location.hostname + "/static";
     });
 
     $("#myRoadtrip").click(function() {
