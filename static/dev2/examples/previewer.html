@@ -86,7 +86,7 @@
 		}
 		
 		$(document).ready(function(){
-
+			alert("körs");
 			
 			directions_service = new google.maps.DirectionsService();
 			directions_renderer.setOptions({preserveViewport:true});
@@ -161,11 +161,10 @@
 			  requestAnimationFrame(draw);
 
 			})();
-			
+			alert("körs2");
 		});
 		//google.maps.event.addDomListener(window, 'load', init);
     
-		init();
 	</script>
 	
 	
