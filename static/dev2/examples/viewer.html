@@ -480,8 +480,11 @@
 		if(navigator.geolocation) {
 			browserSupportFlag = true;
 			navigator.geolocation.getCurrentPosition(function(position) {
-			  map.setCenter(new google.maps.LatLng(position.coords.latitude,position.coords.longitude));
-			  o.drop_pins();
+			var pos = new google.maps.LatLng(position.coords.latitude,
+                                       position.coords.longitude);
+
+			  map.setCenter(pos);
+			  //o.drop_pins();
 			}, function() {
 			  handleNoGeolocation(browserSupportFlag);
 			});
