@@ -107,8 +107,7 @@
       };
      
       
-      var defaultBounds = new google.maps.LatLngBounds(
-      fenway, fenway);
+      var defaultBounds = new google.maps.LatLngBounds(fenway, fenway);
       map.fitBounds(defaultBounds);
       
       panorama = new google.maps.StreetViewPanorama(document.getElementById('pano'), panoramaOptions);
@@ -270,6 +269,7 @@
 										   position.coords.longitude);
 
 				  map.setCenter(pos);
+				  panorama.setPosition(pos);
 				}, function() {
 				  handleNoGeolocation(browserSupportFlag);
 				});
