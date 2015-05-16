@@ -13,6 +13,19 @@
 	<script src="../src/min.jquery.js"></script>
 	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
     
+	<style>
+	#text{
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		margin-top: -50px;
+		margin-left: -50px;
+		width: 100px;
+		height: 100px;
+		opacity: 0;
+	}​
+	</style>
+	
 	<script> 
 	
 		var start_point = new google.maps.LatLng(44.3431,6.783936);
@@ -25,7 +38,7 @@
 		var o;
 		
 		function show(msg) {
-		//	document.getElementById("text").innerHTML = msg;
+			document.getElementById("text").innerHTML = msg;
 		}
 		
 		function init() {
@@ -186,6 +199,8 @@
 					"<br>End: " + end_pin.getPosition().toString() + 
 					"<br>Lookat: " + pivot_pin.getPosition().toString() + 
 					"<br>Ready." );
+				document.getElementById("text").style.opacity = 0;
+				hyperlapse.play();
 			};
 
 			hyperlapse.onFrame = function(e) {
@@ -352,7 +367,7 @@
 							console.log(status);
 						}
 					});
-					
+					document.getElementById("text").style.opacity = 1;
 					gui.close();
 				},
 				drop_pins:function(){
@@ -470,7 +485,7 @@
 			</form>
 		</div>
 		<-->
-		<!-- <div id="text" style="width: 500px; height: 120px; float: left; padding-top: 10px; z-index:0; border-style:solid; border-width:medium;"></div> -->
+		<div id="text"></div>
 	</div>
 	<div id="my-gui-container" style="position: absolute; top: 20px; left: 600px;">
 	</div>
