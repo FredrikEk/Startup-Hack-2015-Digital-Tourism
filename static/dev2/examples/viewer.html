@@ -346,6 +346,7 @@
 					directions_service.route(request, function(response, status) {
 						if (status == google.maps.DirectionsStatus.OK) {   
 							hyperlapse.generate({route: response});
+							document.getElementById("controls").style.opacity = 0;
 						} else {
 							console.log(status);
 						}
