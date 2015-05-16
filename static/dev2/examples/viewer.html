@@ -389,11 +389,6 @@
 
 			var parameters = gui.addFolder('parameters');
 
-			var fov_control = parameters.add(o, 'fov', 1, 180);
-			fov_control.onChange(function(value) {
-				hyperlapse.setFOV(value);
-			});
-
 			var pitch_control = parameters.add(o, 'elevation', -1000, 1000);
 			pitch_control.onChange(function(value) {
 				_elevation = value;
