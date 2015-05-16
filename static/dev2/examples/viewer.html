@@ -23,11 +23,11 @@
 		var _elevation = 50;
 		var _route_markers = [];
 		var o;
-		/*
+		
 		function show(msg) {
-			document.getElementById("text").innerHTML = msg;
+		//	document.getElementById("text").innerHTML = msg;
 		}
-		*/
+		
 		function init() {
 
 			if( window.location.hash ) {
@@ -327,7 +327,7 @@
 				screen_width: window.innerWidth,
 				screen_height: window.innerHeight,
 				generate:function(){
-					//show( "Generating route..." );
+					show( "Generating route..." );
 
 					directions_renderer.setDirections({routes: []});
 
