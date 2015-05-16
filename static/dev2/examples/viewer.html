@@ -341,7 +341,7 @@
 				screen_width: window.innerWidth,
 				screen_height: window.innerHeight,
 				generate:function(){
-					show( "Generating route..." );
+					show( "Generating route... This may take a few minutes..." );
 
 					directions_renderer.setDirections({routes: []});
 
@@ -475,7 +475,7 @@
 <body> 
 	<div id="pano" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index:-1;"></div>
 	<div id="controls">
-		<div id="map" style="width: 430px; height: 430px; float: left; padding: 0;"></div>
+		<div id="map" style="max-width: 40%; width: 430px; height: 430px; float: left; padding: 0;"></div>
 		<!--
 		<div id="controls" style="">
 			<form id="map_form">
@@ -484,7 +484,6 @@
 			</form>
 		</div>
 		<-->
-		<div id="text"></div>
 	</div>
 	<div id="my-gui-container" style="position: absolute; top: 20px; left: 600px;">
 	</div>
@@ -494,6 +493,7 @@
     	<button id="digitalTourism" title="Browse predefined road trips and tourist attractions"><i class="fa fa-plane fa-2x"></i></button>
 		<button id="myPosition" title="Go to my position"><i class="fa fa-street-view fa-2x"></i></button>
 	</div>
+	<div id="text"></div>
 	
 </body> 
 <script>
