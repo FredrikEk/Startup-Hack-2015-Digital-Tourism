@@ -2,7 +2,7 @@
 # Plan:
 
 * Backend: NodeJS 
-* Frontend: HTML
+* Frontend: HTML, JavaScript
 
 #### Ha ursprungsappen device-orientation.se som startsida
 #### Fixa funktionalitet på startsidan som inte funkar i nuläget
