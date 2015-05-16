@@ -318,6 +318,7 @@
 				max_points:1000, 
 				fov: 80, 
 				elevation:Math.floor(_elevation), 
+				search: "Chalmers",
 				tilt:0, 
 				millis:50, 
 				position_x:0,
@@ -378,7 +379,7 @@
 				}
 			};
 
-			//var browselocation = gui.addFolder('Browse Location');
+			gui.add("text", 'Search');
 			 
 
 			var parameters = gui.addFolder('parameters');
