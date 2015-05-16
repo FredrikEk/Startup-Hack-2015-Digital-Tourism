@@ -20,7 +20,7 @@
 		var lookat_point = new google.maps.LatLng(44.34232747290594, 6.786460550292986);
 		var map, directions_renderer, directions_service, streetview_service, geocoder;
 		var start_pin, end_pin, pivot_pin, camera_pin;
-		var _elevation = 50;
+		var _precision = 50;
 		var _route_markers = [];
 		var o;
 		
@@ -35,7 +35,7 @@
 				start_point = new google.maps.LatLng(parts[0], parts[1]);
 				lookat_point = new google.maps.LatLng(parts[2], parts[3]);
 				end_point = new google.maps.LatLng(parts[4], parts[5]);
-				_elevation = parts[6] || 50;
+				_precision = parts[6] || 50;
 			} 
 
 			/* Map */
@@ -52,7 +52,7 @@
 				window.location.hash = start_pin.getPosition().lat() + ',' + start_pin.getPosition().lng() + ','
 					+ pivot_pin.getPosition().lat() + ',' + pivot_pin.getPosition().lng() + ','
 					+ end_pin.getPosition().lat() + ',' + end_pin.getPosition().lng() + ','
-					+ _elevation;
+					+ _precision;
 			}
 
 			var mapOpt = { 
@@ -151,7 +151,7 @@
 				use_lookat: true,
 				distance_between_points: 1,
 				max_points: 1000,
-				elevation: _elevation
+				precision: _precision
 			});
 			
 			
@@ -317,7 +317,7 @@
 				distance_between_points:1, 
 				max_points:1000, 
 				fov: 80, 
-				elevation:Math.floor(_elevation), 
+				precision:Math.floor(_precision), 
 				tilt:0, 
 				speed:50, 
 				position_x:0,
@@ -390,10 +390,10 @@
 
 			var parameters = gui.addFolder('parameters');
 
-			var pitch_control = parameters.add(o, 'elevation', -1000, 1000);
+			var pitch_control = parameters.add(o, 'precision', -1000, 1000);
 			pitch_control.onChange(function(value) {
-				_elevation = value;
-				hyperlapse.elevation_offset = value;
+				_precision = value;
+				hyperlapse.precision_offset = value;
 				changeHash();
 			});
 
