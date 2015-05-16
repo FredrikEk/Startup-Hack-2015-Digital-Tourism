@@ -93,6 +93,10 @@
       document.getElementById('pac-input'));
   panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
 
+  var buttonstest = document.getElementById('buttons');
+  panorama.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(buttonstest);
+
+  
   var searchBox = new google.maps.places.SearchBox(
     /** @type {HTMLInputElement} */(input));
 
