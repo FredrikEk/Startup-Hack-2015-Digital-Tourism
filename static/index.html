@@ -259,15 +259,26 @@
     <div id="map-canvas" style="width:25%; height:25%; position: absolute; z-index: 2; right: 0px; bottom: 0px"></div>
     <a href="#" class="btn" id="dostuff" >do stuff</a> 
 	<div id="buttons" class="controls" style="z-index: 3"> <!--style="z-index: 3; position: absolute; left: 400px; top: 20px;"> -->
-		<button id="myRoadtrip"><i class="fa fa-car fa-2x"></i></button>
-    <button id="myPosition"><i class="fa fa-street-view fa-2x"></i></button>
+    <button id="startpage" title="Try out the application by browsing any location you like"><i class="fa fa-home fa-2x"></i></button>
+		<button id="myRoadtrip" title="Plan your own roadtrip"><i class="fa fa-car fa-2x"></i></button>
+    <button id="digitalTourism" title="Browse predefined road trips and tourist attractions"><i class="fa fa-plane fa-2x"></i></button>
+    <button id="myPosition" title="Go to my position"><i class="fa fa-street-view fa-2x"></i></button>
 	</div>
 	
 	<script>
 		
+    $("#startpage").click(function() {
+      window.location.href = window.location.href + "/";
+    });
+
 		$("#myRoadtrip").click(function() {
 			window.location.href = window.location.href + "/dev2/examples/viewer.html";
 		});
+
+    $("#digitalTourism").click(function() {
+      alert("Not implemented yet");
+      window.location.href = window.location.href + "/dev2/examples/viewer.html";
+    });
 		
 		$("#myPosition").click(function() {
 			if(navigator.geolocation) {
