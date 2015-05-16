@@ -470,12 +470,27 @@
 		<div id="text" style="width: 500px; height: 120px; float: left; padding-top: 10px; z-index:0; border-style:solid; border-width:medium;"></div>
 	</div>
 	<div id="buttons" style="position: absolute; bottom: 20px; left: 600px;"> 
-		<button id="myPosition"><i class="fa fa-camera-retro"></i></button>
+		<button id="startpage" title="Try out the application by browsing any location you like"><i class="fa fa-home fa-2x"></i></button>
+		<button id="myRoadtrip" title="Plan your own roadtrip"><i class="fa fa-car fa-2x"></i></button>
+    	<button id="digitalTourism" title="Browse predefined road trips and tourist attractions"><i class="fa fa-plane fa-2x"></i></button>
+		<button id="myPosition" title="Go to my position"><i class="fa fa-street-view fa-2x"></i></button>
 	</div>
 	
 </body> 
 <script>
+	$("#startpage").click(function() {
+      window.location.href = window.location.href;
+    });
 
+	$("#myRoadtrip").click(function() {
+		window.location.href = window.location.href + "/dev2/examples/viewer.html";
+	});
+
+    $("#digitalTourism").click(function() {
+      alert("Not implemented yet");
+      window.location.href = window.location.href + "/dev2/examples/viewer.html";
+    });
+	
 	$("#myPosition").click(function() {
 		if(navigator.geolocation) {
 			browserSupportFlag = true;
