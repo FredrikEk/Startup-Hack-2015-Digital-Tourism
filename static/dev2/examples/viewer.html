@@ -241,9 +241,6 @@
 				elevation:Math.floor(_elevation), 
 				tilt:0, 
 				millis:50, 
-				offset_x:0,
-				offset_y:0,
-				offset_z:0,
 				position_x:0,
 				position_y:0,
 				use_lookat:true,
@@ -334,21 +331,6 @@
 			var millis_control = parameters.add(o, 'millis', 10, 250);
 			millis_control.onChange(function(value) {
 				hyperlapse.millis = value;
-			});
-
-			var offset_x_control = parameters.add(o, 'offset_x', -360, 360);
-			offset_x_control.onChange(function(value) {
-				hyperlapse.offset.x = value;
-			});
-
-			var offset_y_control = parameters.add(o, 'offset_y', -180, 180);
-			offset_y_control.onChange(function(value) {
-				hyperlapse.offset.y = value;
-			});
-
-			var offset_z_control = parameters.add(o, 'offset_z', -360, 360);
-			offset_z_control.onChange(function(value) {
-				hyperlapse.offset.z = value;
 			});
 
 			var position_x_control = parameters.add(o, 'position_x', -360, 360).listen();
