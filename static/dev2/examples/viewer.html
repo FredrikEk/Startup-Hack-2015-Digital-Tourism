@@ -400,16 +400,6 @@
 				hyperlapse.millis = value;
 			});
 
-			var tilt_control = parameters.add(o, 'tilt', -Math.PI, Math.PI);
-			tilt_control.onChange(function(value) {
-				hyperlapse.tilt = value;
-			});
-
-			var lookat_control = parameters.add(o, 'use_lookat')
-			lookat_control.onChange(function(value) {
-				hyperlapse.use_lookat = value;
-			});
-
 			parameters.open();
 			
 
