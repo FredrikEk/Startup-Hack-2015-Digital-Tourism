@@ -346,11 +346,14 @@
 					directions_service.route(request, function(response, status) {
 						if (status == google.maps.DirectionsStatus.OK) {   
 							hyperlapse.generate({route: response});
+							show_ui = false;
 							document.getElementById("controls").style.opacity = 0;
 						} else {
 							console.log(status);
 						}
-					})
+					});
+					
+					gui.toggleHide();
 				},
 				drop_pins:function(){
 					var bounds = map.getBounds();
@@ -380,6 +383,10 @@
 				},
 				Search: function() {
 					findAddress(this.Location);
+				},
+				toggle_map: function() {
+					show_ui = !show_ui;
+					document.getElementById("controls").style.opacity = (show_ui)?1:0;
 				}
 			};
 
@@ -414,6 +421,7 @@
 
 			gui.add(o, 'drop_pins');
 			gui.add(o, 'generate');
+			gui.add(o, 'toggle_map');
 			gui.add(hyperlapse, 'load');
 
 
