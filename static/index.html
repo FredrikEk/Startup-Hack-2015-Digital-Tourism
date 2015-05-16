@@ -56,10 +56,6 @@
         -moz-border-radius: 5px;
       }
 
-	   #buttons {
-		  width: 30%;
-		  text-overflow: ellipsis;
-	   }
 	  
       #type-selector {
         color: #fff;
@@ -112,9 +108,9 @@
       map.setStreetView(panorama);
       
   // Create the search box and link it to the UI element.
-  //var input = /** @type {HTMLInputElement} */(
-  //    document.getElementById('pac-input'));
-  //panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
+  var input = /** @type {HTMLInputElement} */(
+      document.getElementById('pac-input'));
+  panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
 
   var searchBox = new google.maps.places.SearchBox(
     /** @type {HTMLInputElement} */(input));
