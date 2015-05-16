@@ -32,7 +32,7 @@
 		var lookat_point = new google.maps.LatLng(44.34232747290594, 6.786460550292986);
 		var map, directions_renderer, directions_service, streetview_service, geocoder;
 		var start_pin, end_pin, pivot_pin, camera_pin;
-		var _precision = 50;
+		var _elevation = 50;
 		var _route_markers = [];
 		var o;
 		
@@ -47,7 +47,7 @@
 				start_point = new google.maps.LatLng(parts[0], parts[1]);
 				lookat_point = new google.maps.LatLng(parts[2], parts[3]);
 				end_point = new google.maps.LatLng(parts[4], parts[5]);
-				_precision = parts[6] || 50;
+				_elevation = parts[6] || 50;
 			} 
 
 			/* Map */
@@ -64,7 +64,7 @@
 				window.location.hash = start_pin.getPosition().lat() + ',' + start_pin.getPosition().lng() + ','
 					+ pivot_pin.getPosition().lat() + ',' + pivot_pin.getPosition().lng() + ','
 					+ end_pin.getPosition().lat() + ',' + end_pin.getPosition().lng() + ','
-					+ _precision;
+					+ _elevation;
 			}
 
 			var mapOpt = { 
@@ -156,14 +156,14 @@
 			var hyperlapse = new Hyperlapse(pano, {
 				lookat: lookat_point,
 				fov: 80,
-				speed: 50,
+				millis: 50,
 				width: window.innerWidth,
 				height: window.innerHeight,
 				zoom: 2,
 				use_lookat: true,
 				distance_between_points: 1,
 				max_points: 1000,
-				precision: _precision
+				elevation: _elevation
 			});
 			
 			
@@ -331,9 +331,9 @@
 				distance_between_points:1, 
 				max_points:1000, 
 				fov: 80, 
-				precision:Math.floor(_precision), 
+				elevation:Math.floor(_elevation), 
 				tilt:0, 
-				speed:50, 
+				millis:50, 
 				position_x:0,
 				position_y:0,
 				use_lookat:true,
@@ -411,16 +411,16 @@
 
 			var parameters = gui.addFolder('parameters');
 
-			var pitch_control = parameters.add(o, 'precision', -1000, 1000);
+			var pitch_control = parameters.add(o, 'elevation', -1000, 1000);
 			pitch_control.onChange(function(value) {
-				_precision = value;
-				hyperlapse.precision_offset = value;
+				_elevation = value;
+				hyperlapse.elevation_offset = value;
 				changeHash();
 			});
 
-			var speed_control = parameters.add(o, 'speed', 10, 250);
-			speed_control.onChange(function(value) {
-				hyperlapse.speed = value;
+			var millis_control = parameters.add(o, 'millis', 10, 250);
+			millis_control.onChange(function(value) {
+				hyperlapse.millis = value;
 			});
 
 			parameters.open();
