@@ -41,11 +41,20 @@
         font-family: Roboto;
       }
 
-	  #buttons {
-		width: 30%;
-		text-overflow: ellipsis;
-		padding: 11px 0 13px 0;
-	  }
+      #dostuff
+      {
+        position: absolute;
+        right: 41%;
+        top: 16px;
+        width: 100px;
+        height: 33px;
+        line-height: 33px;
+        background: #f0f0f0;
+        text-align: center;
+        border-radius: 5px;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+      }
 	  
       #type-selector {
         color: #fff;
@@ -102,10 +111,6 @@
       document.getElementById('pac-input'));
   panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
 
-  var buttonstest = document.getElementById('buttons');
-  panorama.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(buttonstest);
-
-  
   var searchBox = new google.maps.places.SearchBox(
     /** @type {HTMLInputElement} */(input));
 
@@ -242,7 +247,7 @@
     <div id="pano" style="width:100%; height:100%; position: absolute; z-index: 1"></div>
     <input id="pac-input" class="controls" type="text" placeholder="Search Box"> </input>
     <div id="map-canvas" style="width:25%; height:25%; position: absolute; z-index: 2; right: 0px; bottom: 0px"></div>
-    <div id="buttons" class="controls"> 
+    <a href="#" class="btn" id="dostuff" >do stuff</a> 
 		<button id="myPosition"><i class="fa fa-camera-retro"></i></button>
 	</div>
 	
