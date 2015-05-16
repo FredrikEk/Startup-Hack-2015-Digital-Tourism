@@ -74,6 +74,17 @@
 			document.getElementById("text").innerHTML = msg;
 		}
 		
+		function start_route(place) {
+			document.getElementById("text").style.opacity = 1;
+			directions_service.route(place.request, function(response, status) {
+			if (status == google.maps.DirectionsStatus.OK) {
+				hyperlapse.generate( {route:response} );
+			} else {
+				show(status);
+			}
+		});
+		}
+		
 		function init() {
 			
 			
@@ -210,13 +221,7 @@
 	});
 	
 	$("#new_york").click(function() {
-		directions_service.route(new_york.request, function(response, status) {
-			if (status == google.maps.DirectionsStatus.OK) {
-				hyperlapse.generate( {route:response} );
-			} else {
-				show(status);
-			}
-		});
+		start_route(new_york);
 	})
 </script>
 
