@@ -260,10 +260,15 @@
     <a href="#" class="btn" id="dostuff" >do stuff</a> 
 	<div id="buttons" class="controls" style="z-index: 3"> <!--style="z-index: 3; position: absolute; left: 400px; top: 20px;"> -->
 		<button id="myPosition"><i class="fa fa-camera-retro"></i></button>
+		<button id="myRoadtrip"><i class="fa fa-street-view"></i></button>
 	</div>
 	
 	<script>
-
+		
+		$("#myRoadtrip").click(function() {
+			window.locatoin.href = window.location.href + "/dev2/examples/viewer.html";
+		});
+		
 		$("#myPosition").click(function() {
 			if(navigator.geolocation) {
 				browserSupportFlag = true;
