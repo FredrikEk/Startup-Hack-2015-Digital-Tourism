@@ -22,7 +22,8 @@
 		var start_pin, end_pin, pivot_pin, camera_pin;
 		var _elevation = 50;
 		var _route_markers = [];
-
+		var o;
+		
 		function show(msg) {
 			document.getElementById("text").innerHTML = msg;
 		}
@@ -309,7 +310,7 @@
 
 			var gui = new dat.GUI();
 
-			var o = {
+			o = {
 				distance_between_points:1, 
 				max_points:1000, 
 				fov: 80, 
