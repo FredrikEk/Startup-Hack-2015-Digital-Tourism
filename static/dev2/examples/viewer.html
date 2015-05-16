@@ -10,6 +10,7 @@
 	<script src="js/GSVPano.js"></script>
 	<script src="../src/Hyperlapse.js"></script>
 	<script src="../src/fulltilt.js"></script>
+	<script src="../src/min.jquery.js"></script>
     
 	<script> 
 	
@@ -466,7 +467,15 @@
 		</div>
 		<div id="text" style="width: 500px; height: 120px; float: left; padding-top: 10px; z-index:0; border-style:solid; border-width:medium;"></div>
 	</div>
-	
+	<div id="buttons" style="position: absolute; top: 20; left: 600px;"> 
+		<button id="test"><i class="fa fa-camera-retro"></i></button>
+	</div>
 	
 </body> 
+<script>
+	$("#test").clicked(function() {
+		alert("test");
+	});
+</script>
+
 </html>
