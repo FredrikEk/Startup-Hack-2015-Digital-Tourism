@@ -9,6 +9,8 @@
 	<script src="js/three.min.js"></script>
 	<script src="js/GSVPano.js"></script>
 	<script src="../src/Hyperlapse.js"></script>
+	<script src="../src/fulltilt.js"></script>
+    
 	<script> 
 	
 		var start_point = new google.maps.LatLng(44.3431,6.783936);
@@ -16,7 +18,7 @@
 		var lookat_point = new google.maps.LatLng(44.34232747290594, 6.786460550292986);
 		var map, directions_renderer, directions_service, streetview_service, geocoder;
 		var start_pin, end_pin, pivot_pin, camera_pin;
-		var _elevation = 0;
+		var _elevation = 50;
 		var _route_markers = [];
 
 		function show(msg) {
@@ -30,7 +32,7 @@
 				start_point = new google.maps.LatLng(parts[0], parts[1]);
 				lookat_point = new google.maps.LatLng(parts[2], parts[3]);
 				end_point = new google.maps.LatLng(parts[4], parts[5]);
-				_elevation = parts[6] || 0;
+				_elevation = parts[6] || 50;
 			} 
 
 			/* Map */
@@ -144,8 +146,8 @@
 				height: window.innerHeight,
 				zoom: 2,
 				use_lookat: true,
-				distance_between_points: 5,
-				max_points: 100,
+				distance_between_points: 1,
+				max_points: 1000,
 				elevation: _elevation
 			});
 			
@@ -229,21 +231,89 @@
 			}, false );
 
 			
+				// Create a new FULLTILT Promise for e.g. *compass*-based deviceorientation data
+				var promise = new FULLTILT.getDeviceOrientation({ 'type': 'world' });
+
+				// FULLTILT.DeviceOrientation instance placeholder
+				var deviceOrientation;
+
+				promise
+				  .then(function(controller) {
+					// Store the returned FULLTILT.DeviceOrientation object
+					deviceOrientation = controller;
+				  })
+				  .catch(function(message) {
+					console.error(message);
+
+					// Optionally set up fallback controls...
+					// initManualControls();
+				  });
+
+				var orientationQuat = new FULLTILT.Quaternion();
+				
+				
+					var worldQuat = new FULLTILT.Quaternion( - Math.sqrt( 0.5 ), 0, 0 , Math.sqrt( 0.5 ) );
+				
+				  
+				(function draw() {
+
+					
+					
+				  // If we have a valid FULLTILT.DeviceOrientation object then use it
+				  if (deviceOrientation) {
+					
+				
+					// Obtain the *screen-adjusted* normalized device rotation
+					// as Quaternion, Rotation Matrix and Euler Angles objects
+					// from our FULLTILT.DeviceOrientation object
+					//var matrix = deviceOrientation.getScreenAdjustedMatrix();
+					//var euler = deviceOrientation.getScreenAdjustedEuler();
+					//euler.rotateY(-euler.gamma* (Math.PI / 180));
+					
+					var euler = deviceOrientation.getScreenAdjustedEuler();
+					//euler.rotateY(-euler.gamma* (Math.PI / 180));
+					
+					
+					var quat = new FULLTILT.Quaternion();
+					quat.setFromEuler(euler);
+				
+					quat.multiply( worldQuat );
+					
+					euler.setFromQuaternion(quat);
+					
+					
+					// Do something with our quaternion, matrix, euler objects...
+					//document.getElementById('eulerTest').innerHTML = euler.alpha;
+					//document.getElementById('matrixTest').innerHTML = euler.beta;
+					hyperlapse.position.x = -euler.alpha; // reversed dragging direction (thanks @mrdoob!)
+					hyperlapse.position.y = euler.beta;
+					//document.getElementById('quaterionTest').innerHTML = euler.gamma;
+					//plotMaps(-euler.alpha, euler.beta);
+					o.position_x = -euler.alpha;
+					o.position_y = euler.beta;
+					//console.debug(euler);
+					//console.debug(matrix);
+					//console.debug(euler);
+
+				  }
+
+				  // Execute function on each browser animation frame
+				  requestAnimationFrame(draw);
+
+				})();
+			
 
 			/* Dat GUI */
 
 			var gui = new dat.GUI();
 
 			var o = {
-				distance_between_points:10, 
-				max_points:100, 
+				distance_between_points:1, 
+				max_points:1000, 
 				fov: 80, 
 				elevation:Math.floor(_elevation), 
 				tilt:0, 
 				millis:50, 
-				offset_x:0,
-				offset_y:0,
-				offset_z:0,
 				position_x:0,
 				position_y:0,
 				use_lookat:true,
@@ -309,16 +379,6 @@
 
 			var parameters = gui.addFolder('parameters');
 
-			var distance_between_points_control = parameters.add(o, 'distance_between_points', 5, 100);
-			distance_between_points_control.onChange(function(value) {
-				hyperlapse.setDistanceBetweenPoint(value);
-			});
-
-			var max_points = parameters.add(o, 'max_points', 10, 300);
-			max_points.onChange(function(value) {
-				hyperlapse.setMaxPoints(value);
-			});
-
 			var fov_control = parameters.add(o, 'fov', 1, 180);
 			fov_control.onChange(function(value) {
 				hyperlapse.setFOV(value);
@@ -334,31 +394,6 @@
 			var millis_control = parameters.add(o, 'millis', 10, 250);
 			millis_control.onChange(function(value) {
 				hyperlapse.millis = value;
-			});
-
-			var offset_x_control = parameters.add(o, 'offset_x', -360, 360);
-			offset_x_control.onChange(function(value) {
-				hyperlapse.offset.x = value;
-			});
-
-			var offset_y_control = parameters.add(o, 'offset_y', -180, 180);
-			offset_y_control.onChange(function(value) {
-				hyperlapse.offset.y = value;
-			});
-
-			var offset_z_control = parameters.add(o, 'offset_z', -360, 360);
-			offset_z_control.onChange(function(value) {
-				hyperlapse.offset.z = value;
-			});
-
-			var position_x_control = parameters.add(o, 'position_x', -360, 360).listen();
-			position_x_control.onChange(function(value) {
-				hyperlapse.position.x = value;
-			});
-
-			var position_y_control = parameters.add(o, 'position_y', -180, 180).listen();
-			position_y_control.onChange(function(value) {
-				hyperlapse.position.y = value;
 			});
 
 			var tilt_control = parameters.add(o, 'tilt', -Math.PI, Math.PI);
