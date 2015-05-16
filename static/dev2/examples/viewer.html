@@ -200,6 +200,7 @@
 					"<br>Lookat: " + pivot_pin.getPosition().toString() + 
 					"<br>Ready." );
 				document.getElementById("text").style.opacity = 0;
+				document.getElementById("play-pause").style.opacity = 1;
 				hyperlapse.play();
 			};
 
@@ -494,10 +495,15 @@
     	<button id="digitalTourism" title="Browse predefined road trips and tourist attractions"><i class="fa fa-plane fa-2x"></i></button>
 		<button id="myPosition" title="Go to my position"><i class="fa fa-street-view fa-2x"></i></button>
 	</div>
+	<div id="play-pause" style="position: absolute; top: 50px; left: 50%; max-width: 10%; opacity: 0">
+		<button id="play-pause-toggle" title="Play/Pause"><i class="fa fa-pause fa-4x"></i></button>
+	</div>
 	<div id="text"></div>
 	
 </body> 
 <script>
+
+	var play = true;
 	$("#startpage").click(function() {
       window.location.href = "http://" + window.location.hostname + "/test/static";
     });
@@ -538,7 +544,16 @@
 		  alert("Your browser doesn't support geolocation. We've placed you in Siberia.");
 		}
 	  }
-
+	$("play-pause-toggle").click(function() {
+		if(play) {
+			hyperlapse.pause();
+			$("#play-pause-toggle").html('<i class="fa fa-play fa-4x"></i>');
+		} else {
+			hyperlapse.play();
+			$("#play-pause-toggle").html('<i class="fa fa-pause fa-4x"></i>');
+		}
+		play = !play;
+	});
 </script>
 
 </html>
