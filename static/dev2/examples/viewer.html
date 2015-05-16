@@ -36,6 +36,7 @@
 		var _elevation = 50;
 		var _route_markers = [];
 		var o;
+		var hyperlapse;
 		
 		function show(msg) {
 			document.getElementById("text").innerHTML = msg;
@@ -154,7 +155,7 @@
 			var px, py;
 			var onPointerDownPointerX=0, onPointerDownPointerY=0;
 
-			var hyperlapse = new Hyperlapse(pano, {
+			hyperlapse = new Hyperlapse(pano, {
 				lookat: lookat_point,
 				fov: 80,
 				millis: 50,
