@@ -318,7 +318,6 @@
 				max_points:1000, 
 				fov: 80, 
 				elevation:Math.floor(_elevation), 
-				Location: "Chalmers",
 				tilt:0, 
 				millis:50, 
 				position_x:0,
@@ -376,14 +375,10 @@
 							changeHash();
 						});
 					});
-				},
-				Search: function() {
-					findAddress(this.Location);
 				}
 			};
 
-			gui.add(o, 'Location');
-			gui.add(o, 'Search');
+			//var browselocation = gui.addFolder('Browse Location');
 			 
 
 			var parameters = gui.addFolder('parameters');
@@ -457,6 +452,12 @@
 	<div id="pano" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index:-1;"></div>
 	<div id="controls">
 		<div id="map" style="width: 400px; height: 300px; float: left; padding: 0;"></div>
+		<div id="controls" style="">
+			<form id="map_form">
+				<input type="text" name="address" id="address" />
+				<button type="submit" id="searchButton" >Search</button>
+			</form>
+		</div>
 		<!-- <div id="text" style="width: 500px; height: 120px; float: left; padding-top: 10px; z-index:0; border-style:solid; border-width:medium;"></div> -->
 	</div>
 	<div id="my-gui-container" style="position: absolute; top: 20px; left: 600px;">
