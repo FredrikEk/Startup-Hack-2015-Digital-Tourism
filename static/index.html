@@ -44,6 +44,8 @@
 	  #buttons {
 		width: 30%;
 		text-overflow: ellipsis;
+		padding: 11px 0 13px 0;
+        
 	  }
 	  
       #type-selector {
@@ -97,9 +99,9 @@
       map.setStreetView(panorama);
       
   // Create the search box and link it to the UI element.
-  //var input = /** @type {HTMLInputElement} */(
-  //    document.getElementById('pac-input'));
-  //panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
+  var input = /** @type {HTMLInputElement} */(
+      document.getElementById('pac-input'));
+  panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
 
   var buttonstest = document.getElementById('buttons');
   panorama.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(buttonstest);
