@@ -144,7 +144,7 @@
 			var hyperlapse = new Hyperlapse(pano, {
 				lookat: lookat_point,
 				fov: 80,
-				millis: 50,
+				speed: 50,
 				width: window.innerWidth,
 				height: window.innerHeight,
 				zoom: 2,
@@ -319,7 +319,7 @@
 				fov: 80, 
 				elevation:Math.floor(_elevation), 
 				tilt:0, 
-				millis:50, 
+				speed:50, 
 				position_x:0,
 				position_y:0,
 				use_lookat:true,
@@ -397,9 +397,9 @@
 				changeHash();
 			});
 
-			var millis_control = parameters.add(o, 'millis', 10, 250);
-			millis_control.onChange(function(value) {
-				hyperlapse.millis = value;
+			var speed_control = parameters.add(o, 'speed', 10, 250);
+			speed_control.onChange(function(value) {
+				hyperlapse.speed = value;
 			});
 
 			parameters.open();
