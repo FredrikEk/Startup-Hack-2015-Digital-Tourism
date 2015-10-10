@@ -135,7 +135,7 @@ var Hyperlapse = function(container, params) {
 		_forward = true,
 		_lookat_heading = 0, _lookat_elevation = 0,
 		_canvas, _context,
-		_camera, _scene, _renderer, _mesh,
+		_camera, _cameraL, _cameraR, _scene, _renderer, _mesh,
 		_loader, _cancel_load = false,
 		_ctime = Date.now(),
 		_ptime = 0, _dtime = 0,
@@ -175,7 +175,10 @@ var Hyperlapse = function(container, params) {
 
 	_camera = new THREE.PerspectiveCamera( _fov, _w/_h, 1, 1100 );
 	_camera.target = new THREE.Vector3( 0, 0, 0 );
-
+	
+	_cameraR = new THREE.PerspectiveCamera();
+	_cameraL = new THREE.PerspectiveCamera();
+	
 	_scene = new THREE.Scene();
 	_scene.add( _camera );
 
@@ -193,7 +196,7 @@ var Hyperlapse = function(container, params) {
   _renderer = isWebGL() ? new THREE.WebGLRenderer() : new THREE.CanvasRenderer();
 	_renderer.autoClearColor = false;
 	_renderer.setSize( _w, _h );
-
+	
 	_mesh = new THREE.Mesh(
 		new THREE.SphereGeometry( 500, 60, 40 ),
 		new THREE.MeshBasicMaterial( { map: new THREE.Texture(), side: THREE.DoubleSide, overdraw: true } )
@@ -481,11 +484,73 @@ var Hyperlapse = function(container, params) {
 			_camera.lookAt( _camera.target );
 			_camera.rotation.z -= o_z;
 
+			var eyeSeparation = 3;
+			var focalLength = 15;
+			
+			var _quaternion;
+			var _position;
+			var _scale;
+			
+			_camera.matrixWorld.decompose( _position, _quaternion, _scale );
+			
+			_fov = THREE.Math.radToDeg( 2 * Math.atan( Math.tan( THREE.Math.degToRad( camera.fov ) * 0.5 ) / camera.zoom ) );
+
+			_ndfl = camera.near / focalLength;
+			_halfFocalHeight = Math.tan( THREE.Math.degToRad( _fov ) * 0.5 ) * focalLength;
+			_halfFocalWidth = _halfFocalHeight * 0.5 * camera.aspect;
+
+			_top = _halfFocalHeight * _ndfl;
+			_bottom = - _top;
+			_innerFactor = ( _halfFocalWidth + eyeSeparation / 2.0 ) / ( _halfFocalWidth * 2.0 );
+			_outerFactor = 1.0 - _innerFactor;
+
+			_outer = _halfFocalWidth * 2.0 * _ndfl * _outerFactor;
+			_inner = _halfFocalWidth * 2.0 * _ndfl * _innerFactor;
+			
+			_cameraL.projectionMatrix.makeFrustum(
+				- _outer,
+				_inner,
+				_bottom,
+				_top,
+				camera.near,
+				camera.far
+			);
+			
+			_cameraL.position.copy( _position );
+			_cameraL.quaternion.copy( _quaternion );
+			_cameraL.translateX( - eyeSeparation / 2.0 );
+			
+			
+			_cameraR.projectionMatrix.makeFrustum(
+				- _inner,
+				_outer,
+				_bottom,
+				_top,
+				camera.near,
+				camera.far
+			);
+
+			_cameraR.position.copy( _position );
+			_cameraR.quaternion.copy( _quaternion );
+			_cameraR.translateX( this.eyeSeparation / 2.0 );
+			
 			if(self.use_rotation_comp) {
 				_camera.rotation.z -= self.rotation_comp.toRad();
 			}
 			_mesh.rotation.z = _origin_pitch.toRad();
-			_renderer.render( _scene, _camera );
+			
+			renderer.clear();
+			renderer.enableScissorTest( true );
+
+			renderer.setScissor( 0, 0, _width, _height );
+			renderer.setViewport( 0, 0, _width, _height );
+			renderer.render( scene, _cameraL );
+
+			renderer.setScissor( _width, 0, _width, _height );
+			renderer.setViewport( _width, 0, _width, _height );
+			renderer.render( scene, _cameraR );
+
+			renderer.enableScissorTest( false );
 		}
 	};
 
@@ -663,7 +728,7 @@ var Hyperlapse = function(container, params) {
 	 * @param {Number} height
 	 */
 	this.setSize = function(width, height) {
-		_w = width;
+		_w = width / 2;
 		_h = height;
 		_renderer.setSize( _w, _h );
 		_camera.projectionMatrix.makePerspective( _fov, _w/_h, 1, 1100 );
