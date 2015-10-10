@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html> 
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/> 
+	<meta name="viewport" content="width=device-width, height=device-height,  initial-scale=1.0, user-scalable=no,user-scalable=0"/>
+	<title>Viewer Example</title> 
+
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false" type="text/javascript"></script> 
+	<script src="js/dat.gui.min.js"></script>
+	<script src="js/three.min.js"></script>
+	<script src="js/GSVPano.js"></script>
+	<script src="../src/Hyperlapse.js"></script>
+	<script src="../src/fulltilt.js"></script>
+	<script src="../src/min.jquery.js"></script>
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    
+	<style>
+	#text{
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		margin-top: -50px;
+		margin-left: -50px;
+		width: 100px;
+		height: 100px;
+	}​
+	</style>
+	
+	
+	<script>
+	
+		
+		var new_york = {
+			request:{
+				origin: new google.maps.LatLng(37.816480000000006,-122.47825,37),
+				destination: new google.maps.LatLng(37.81195,-122.47773000000001),
+				travelMode: google.maps.DirectionsTravelMode.DRIVING
+			}
+		};
+	
+		var map, directions_renderer, directions_service, streetview_service, geocoder;
+		
+		
+		var hyperlapse = new Hyperlapse(document.getElementById('pano'), {
+			lookat: new google.maps.LatLng(37.81409525128964,-122.4775045005249),
+			zoom: 1,
+			elevation: 50
+		});
+
+		hyperlapse.onError = function(e) {
+			show(e);
+		};
+
+		hyperlapse.onRouteComplete = function(e) {
+			hyperlapse.load();
+		};
+		
+		hyperlapse.onLoadProgress = function(e) {
+			show( "Loading: "+ (e.position+1) +" of "+ hyperlapse.length() );
+		};
+
+		hyperlapse.onLoadComplete = function(e) {
+			show( "" +
+				"Start: " + start_pin.getPosition().toString() + 
+				"<br>End: " + end_pin.getPosition().toString() + 
+				"<br>Lookat: " + pivot_pin.getPosition().toString() + 
+				"<br>Ready." );
+			document.getElementById("text").style.opacity = 0;
+			document.getElementById("play-pause").style.opacity = 1;
+			hyperlapse.play();
+		};
+		
+		function show(msg) {
+			document.getElementById("text").innerHTML = msg;
+		}
+		
+		function start_route(place) {
+			document.getElementById("text").style.opacity = 1;
+			directions_service.route(place.request, function(response, status) {
+			if (status == google.maps.DirectionsStatus.OK) {
+				hyperlapse.generate( {route:response} );
+			} else {
+				show(status);
+			}
+		});
+		}
+		
+		function init(){
+			
+			directions_service = new google.maps.DirectionsService();
+			directions_renderer.setOptions({preserveViewport:true});
+			
+			// Create a new FULLTILT Promise for e.g. *compass*-based deviceorientation data
+			var promise = new FULLTILT.getDeviceOrientation({ 'type': 'world' });
+
+			// FULLTILT.DeviceOrientation instance placeholder
+			var deviceOrientation;
+
+			promise
+			  .then(function(controller) {
+				// Store the returned FULLTILT.DeviceOrientation object
+				deviceOrientation = controller;
+			  })
+			  .catch(function(message) {
+				console.error(message);
+
+				// Optionally set up fallback controls...
+				// initManualControls();
+			  });
+
+			var orientationQuat = new FULLTILT.Quaternion();
+			
+			
+				var worldQuat = new FULLTILT.Quaternion( - Math.sqrt( 0.5 ), 0, 0 , Math.sqrt( 0.5 ) );
+			
+			  
+			(function draw() {
+
+				
+				
+			  // If we have a valid FULLTILT.DeviceOrientation object then use it
+			  if (deviceOrientation) {
+				
+			
+				// Obtain the *screen-adjusted* normalized device rotation
+				// as Quaternion, Rotation Matrix and Euler Angles objects
+				// from our FULLTILT.DeviceOrientation object
+				//var matrix = deviceOrientation.getScreenAdjustedMatrix();
+				//var euler = deviceOrientation.getScreenAdjustedEuler();
+				//euler.rotateY(-euler.gamma* (Math.PI / 180));
+				
+				var euler = deviceOrientation.getScreenAdjustedEuler();
+				//euler.rotateY(-euler.gamma* (Math.PI / 180));
+				
+				
+				var quat = new FULLTILT.Quaternion();
+				quat.setFromEuler(euler);
+			
+				quat.multiply( worldQuat );
+				
+				euler.setFromQuaternion(quat);
+				
+				
+				// Do something with our quaternion, matrix, euler objects...
+				//document.getElementById('eulerTest').innerHTML = euler.alpha;
+				//document.getElementById('matrixTest').innerHTML = euler.beta;
+				hyperlapse.position.x = -euler.alpha; // reversed dragging direction (thanks @mrdoob!)
+				hyperlapse.position.y = euler.beta;
+				//document.getElementById('quaterionTest').innerHTML = euler.gamma;
+				//plotMaps(-euler.alpha, euler.beta);
+				o.position_x = -euler.alpha;
+				o.position_y = euler.beta;
+				//console.debug(euler);
+				//console.debug(matrix);
+				//console.debug(euler);
+
+			  }
+
+			  // Execute function on each browser animation frame
+			  requestAnimationFrame(draw);
+
+			})();
+		}
+		
+		
+		window.onload = init;
+	</script>
+	
+	
+</head> 
+<body> 
+	<div id="pano" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index:-1;"></div>
+	
+	<div id="buttons" style="position: absolute; top: 20px; left: 42%; max-width: 20%"> 
+		<button id="startpage" title="Try out the application by browsing any location you like"><i class="fa fa-home fa-2x"></i></button>
+		<button id="myRoadtrip" title="Plan your own roadtrip"><i class="fa fa-car fa-2x"></i></button>
+    	<button id="digitalTourism" title="Browse predefined road trips and tourist attractions"><i class="fa fa-plane fa-2x"></i></button>
+	</div>
+	<div id="play-pause" style="position: absolute; top: 80px; left: 45.7%; max-width: 10%; opacity: 0">
+		<button id="play-pause-toggle" title="Play/Pause" style="background-color: Transparent; border: 0px"><i class="fa fa-pause fa-5x"></i></button>
+	</div>
+	<div style="position: absolute; top: 160px; left: 42%; max-width: 15%; opacity: 1">
+		<button id="new_york"> New York </button>
+	</div>
+	<div id="text"></div>
+	
+</body> 
+<script>
+
+	var play = true;
+	
+	$("#startpage").click(function() {
+      window.location.href = "http://" + window.location.hostname ;
+    });
+
+    $("#myRoadtrip").click(function() {
+      window.location.href = "http://" + window.location.hostname + "/dev3/examples/viewer.html";
+    });
+
+    $("#digitalTourism").click(function() {
+      window.location.href = "http://" + window.location.hostname + "/dev3/examples/previewer.html";
+    });
+	
+	function handleNoGeolocation(errorFlag) {
+		if (errorFlag == true) {
+		  alert("Geolocation service failed.");
+		} else {
+		  alert("Your browser doesn't support geolocation. We've placed you in Siberia.");
+		}
+	  }
+	  
+	$("#play-pause-toggle").click(function() {
+		if(play) {
+			hyperlapse.pause();
+			$("#play-pause-toggle").html('<i class="fa fa-play fa-5x"></i>');
+		} else {
+			hyperlapse.play();
+			$("#play-pause-toggle").html('<i class="fa fa-pause fa-5x"></i>');
+		}
+		play = !play;
+	});
+	
+	$("#new_york").click(function() {
+		start_route(new_york);
+	})
+</script>
+
+</html>

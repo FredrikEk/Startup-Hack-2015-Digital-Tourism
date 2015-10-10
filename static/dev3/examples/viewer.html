@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html> 
+<head> 
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/> 
+	<meta name="viewport" content="width=device-width, height=device-height,  initial-scale=1.0, user-scalable=no,user-scalable=0"/>
+	<title>Viewer Example</title> 
+
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false" type="text/javascript"></script> 
+	<script src="js/dat.gui.min.js"></script>
+	<script src="js/three.min.js"></script>
+	<script src="js/GSVPano.js"></script>
+	<script src="../src/Hyperlapse.js"></script>
+	<script src="../src/fulltilt.js"></script>
+	<script src="../src/min.jquery.js"></script>
+	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    
+	<style>
+	#text{
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		margin-top: -50px;
+		margin-left: -50px;
+		width: 100px;
+		height: 100px;
+	}​
+	</style>
+	
+	<script> 
+	
+		var start_point = new google.maps.LatLng(44.3431,6.783936);
+		var end_point = new google.maps.LatLng(44.340578,6.782684);
+		var lookat_point = new google.maps.LatLng(44.34232747290594, 6.786460550292986);
+		var map, directions_renderer, directions_service, streetview_service, geocoder;
+		var start_pin, end_pin, pivot_pin, camera_pin;
+		var _elevation = 50;
+		var _route_markers = [];
+		var o;
+		var hyperlapse;
+		
+		function show(msg) {
+			document.getElementById("text").innerHTML = msg;
+		}
+		
+		function init() {
+
+			if( window.location.hash ) {
+				parts = window.location.hash.substr( 1 ).split( ',' );
+				start_point = new google.maps.LatLng(parts[0], parts[1]);
+				lookat_point = new google.maps.LatLng(parts[2], parts[3]);
+				end_point = new google.maps.LatLng(parts[4], parts[5]);
+				_elevation = parts[6] || 50;
+			} 
+
+			/* Map */
+
+			function snapToRoad(point, callback) {
+				var request = { origin: point, destination: point, travelMode: google.maps.TravelMode["DRIVING"] };
+				directions_service.route(request, function(response, status) {
+					if(status=="OK") callback(response.routes[0].overview_path[0]);
+					else callback(null);
+				});
+			}
+
+			function changeHash() {
+				window.location.hash = start_pin.getPosition().lat() + ',' + start_pin.getPosition().lng() + ','
+					+ pivot_pin.getPosition().lat() + ',' + pivot_pin.getPosition().lng() + ','
+					+ end_pin.getPosition().lat() + ',' + end_pin.getPosition().lng() + ','
+					+ _elevation;
+			}
+
+			var mapOpt = { 
+				mapTypeId: google.maps.MapTypeId.ROADMAP,
+				center: start_point,
+				zoom: 15
+			};
+
+			map = new google.maps.Map(document.getElementById("map"), mapOpt);
+			geocoder = new google.maps.Geocoder();
+
+			var overlay = new google.maps.StreetViewCoverageLayer();
+			overlay.setMap(map);
+
+			directions_service = new google.maps.DirectionsService();
+			directions_renderer = new google.maps.DirectionsRenderer({draggable:false, markerOptions:{visible: false}});
+			directions_renderer.setMap(map);
+			directions_renderer.setOptions({preserveViewport:true});
+
+			camera_pin = new google.maps.Marker({
+				position: start_point,
+				map: map
+			});
+
+			start_pin = new google.maps.Marker({
+				position: start_point,
+				draggable: true,
+				map: map
+			});
+
+			google.maps.event.addListener (start_pin, 'dragend', function (event) {
+				snapToRoad(start_pin.getPosition(), function(result) {
+					start_pin.setPosition(result);
+					start_point = result;
+					changeHash();
+				});
+			});
+
+			end_pin = new google.maps.Marker({
+				position: end_point,
+				draggable: true,
+				map: map
+			});
+
+			google.maps.event.addListener (end_pin, 'dragend', function (event) {
+				snapToRoad(end_pin.getPosition(), function(result) {
+					end_pin.setPosition(result);
+					end_point = result;
+					changeHash();
+				});
+			});
+
+			pivot_pin = new google.maps.Marker({
+				position: lookat_point,
+				draggable: true,
+				map: map
+			});
+
+			google.maps.event.addListener (pivot_pin, 'dragend', function (event) {
+				hyperlapse.setLookat( pivot_pin.getPosition() );
+				changeHash();
+			});
+
+			function findAddress(address) {
+				geocoder.geocode( { 'address': address}, function(results, status) {
+					if (status == google.maps.GeocoderStatus.OK) {
+						map.setCenter(results[0].geometry.location);
+						o.drop_pins();
+					} else {
+						show( "Geocode was not successful for the following reason: " + status );
+					}
+				});
+			}
+
+			//var search = document.getElementById( 'searchButton' );
+			//search.addEventListener( 'click', function( event ) {
+			//	event.preventDefault();
+			//	findAddress( document.getElementById("address").value );
+			//}, false );
+
+
+			/* Hyperlapse */
+
+			var pano = document.getElementById('pano');
+			var is_moving = false;
+			var px, py;
+			var onPointerDownPointerX=0, onPointerDownPointerY=0;
+
+			hyperlapse = new Hyperlapse(pano, {
+				lookat: lookat_point,
+				fov: 80,
+				millis: 50,
+				width: window.innerWidth,
+				height: window.innerHeight,
+				zoom: 2,
+				use_lookat: true,
+				distance_between_points: 1,
+				max_points: 1000,
+				elevation: _elevation
+			});
+			
+			
+
+			hyperlapse.onError = function(e) {
+				show( "ERROR: "+ e.message );
+			};
+
+			hyperlapse.onRouteProgress = function(e) {
+				_route_markers.push( new google.maps.Marker({
+					position: e.point.location,
+					draggable: false,
+					icon: "dot_marker.png",
+					map: map
+					})
+				);
+			};
+
+			hyperlapse.onRouteComplete = function(e) {
+				directions_renderer.setDirections(e.response);
+				show( "Number of Points: "+ hyperlapse.length() );
+				hyperlapse.load();
+			};
+
+			hyperlapse.onLoadProgress = function(e) {
+				show( "Loading: "+ (e.position+1) +" of "+ hyperlapse.length() );
+			};
+
+			hyperlapse.onLoadComplete = function(e) {
+				show( "" +
+					"Start: " + start_pin.getPosition().toString() + 
+					"<br>End: " + end_pin.getPosition().toString() + 
+					"<br>Lookat: " + pivot_pin.getPosition().toString() + 
+					"<br>Ready." );
+				document.getElementById("text").style.opacity = 0;
+				document.getElementById("play-pause").style.opacity = 1;
+				hyperlapse.play();
+			};
+
+			hyperlapse.onFrame = function(e) {
+				show( "" +
+					"Start: " + start_pin.getPosition().toString() + 
+					"<br>End: " + end_pin.getPosition().toString() + 
+					"<br>Lookat: " + pivot_pin.getPosition().toString() + 
+					"<br>Position: "+ (e.position+1) +" of "+ hyperlapse.length() );
+				camera_pin.setPosition(e.point.location);
+			};
+
+			pano.addEventListener( 'mousedown', function(e){
+				e.preventDefault();
+
+				is_moving = true;
+
+				onPointerDownPointerX = e.clientX;
+				onPointerDownPointerY = e.clientY;
+
+				px = hyperlapse.position.x;
+				py = hyperlapse.position.y;
+
+			}, false );
+
+			pano.addEventListener( 'mousemove', function(e){
+				e.preventDefault();
+				var f = hyperlapse.fov() / 500;
+
+				if ( is_moving ) {
+					var dx = ( onPointerDownPointerX - e.clientX ) * f;
+					var dy = ( e.clientY - onPointerDownPointerY ) * f;
+					hyperlapse.position.x = px + dx; // reversed dragging direction (thanks @mrdoob!)
+					hyperlapse.position.y = py + dy;
+
+					o.position_x = hyperlapse.position.x;
+					o.position_y = hyperlapse.position.y;
+				}
+
+			}, false );
+
+			pano.addEventListener( 'mouseup', function(){
+				is_moving = false;
+
+				hyperlapse.position.x = px;
+				//hyperlapse.position.y = py;
+			}, false );
+
+			
+				// Create a new FULLTILT Promise for e.g. *compass*-based deviceorientation data
+				var promise = new FULLTILT.getDeviceOrientation({ 'type': 'world' });
+
+				// FULLTILT.DeviceOrientation instance placeholder
+				var deviceOrientation;
+
+				promise
+				  .then(function(controller) {
+					// Store the returned FULLTILT.DeviceOrientation object
+					deviceOrientation = controller;
+				  })
+				  .catch(function(message) {
+					console.error(message);
+
+					// Optionally set up fallback controls...
+					// initManualControls();
+				  });
+
+				var orientationQuat = new FULLTILT.Quaternion();
+				
+				
+					var worldQuat = new FULLTILT.Quaternion( - Math.sqrt( 0.5 ), 0, 0 , Math.sqrt( 0.5 ) );
+				
+				  
+				(function draw() {
+
+					
+					
+				  // If we have a valid FULLTILT.DeviceOrientation object then use it
+				  if (deviceOrientation) {
+					
+				
+					// Obtain the *screen-adjusted* normalized device rotation
+					// as Quaternion, Rotation Matrix and Euler Angles objects
+					// from our FULLTILT.DeviceOrientation object
+					//var matrix = deviceOrientation.getScreenAdjustedMatrix();
+					//var euler = deviceOrientation.getScreenAdjustedEuler();
+					//euler.rotateY(-euler.gamma* (Math.PI / 180));
+					
+					var euler = deviceOrientation.getScreenAdjustedEuler();
+					//euler.rotateY(-euler.gamma* (Math.PI / 180));
+					
+					
+					var quat = new FULLTILT.Quaternion();
+					quat.setFromEuler(euler);
+				
+					quat.multiply( worldQuat );
+					
+					euler.setFromQuaternion(quat);
+					
+					
+					// Do something with our quaternion, matrix, euler objects...
+					//document.getElementById('eulerTest').innerHTML = euler.alpha;
+					//document.getElementById('matrixTest').innerHTML = euler.beta;
+					hyperlapse.position.x = -euler.alpha; // reversed dragging direction (thanks @mrdoob!)
+					hyperlapse.position.y = euler.beta;
+					//document.getElementById('quaterionTest').innerHTML = euler.gamma;
+					//plotMaps(-euler.alpha, euler.beta);
+					o.position_x = -euler.alpha;
+					o.position_y = euler.beta;
+					//console.debug(euler);
+					//console.debug(matrix);
+					//console.debug(euler);
+
+				  }
+
+				  // Execute function on each browser animation frame
+				  requestAnimationFrame(draw);
+
+				})();
+			
+
+			/* Dat GUI */
+			var devWidth = (window.innerWidth > 0) ? window.innerWidth * 0.3 : screen.width * 0.3;
+			var gui = new dat.GUI({autoPlace: false, width: devWidth});
+
+			var customContainer = document.getElementById('my-gui-container');
+			customContainer.appendChild(gui.domElement);
+			
+			o = {
+				distance_between_points:1, 
+				max_points:1000, 
+				fov: 80, 
+				elevation:Math.floor(_elevation), 
+				tilt:0, 
+				millis:50, 
+				position_x:0,
+				position_y:0,
+				use_lookat:true,
+				Location: "Chalmers",
+				screen_width: window.innerWidth,
+				screen_height: window.innerHeight,
+				generate:function(){
+					show( "Generating route... This may take a few minutes..." );
+
+					directions_renderer.setDirections({routes: []});
+
+					var marker;
+					while(_route_markers.length > 0) {
+						marker = _route_markers.pop();
+						marker.setMap(null);
+					}
+
+					request = {
+						origin: start_point, 
+						destination: end_point, 
+						travelMode: google.maps.DirectionsTravelMode.DRIVING
+					};
+
+					directions_service.route(request, function(response, status) {
+						if (status == google.maps.DirectionsStatus.OK) {   
+							hyperlapse.generate({route: response});
+							show_ui = false;
+							document.getElementById("controls").style.opacity = 0;
+						} else {
+							console.log(status);
+						}
+					});
+					document.getElementById("text").style.opacity = 1;
+					gui.close();
+				},
+				drop_pins:function(){
+					var bounds = map.getBounds();
+					var top_left = bounds.getNorthEast();
+					var bot_right = bounds.getSouthWest();
+					var hdif = Math.abs(top_left.lng() - bot_right.lng());
+					var spacing = hdif/4;
+
+					var center = map.getCenter();
+					var c1 = new google.maps.LatLng(center.lat(), center.lng()-spacing);
+					var c2 = new google.maps.LatLng(center.lat(), center.lng());
+					var c3 = new google.maps.LatLng(center.lat(), center.lng()+spacing);
+
+					hyperlapse.lookat = c2;
+					pivot_pin.setPosition(c2);
+
+					snapToRoad(c1, function(result1) {
+						start_pin.setPosition(result1);
+						start_point = result1;
+
+						snapToRoad(c3, function(result3) {
+							end_pin.setPosition(result3);
+							end_point = result3;
+							changeHash();
+						});
+					});
+				},
+				Search: function() {
+					findAddress(this.Location);
+				},
+				toggle_map: function() {
+					show_ui = !show_ui;
+					document.getElementById("controls").style.opacity = (show_ui)?1:0;
+				}
+			};
+
+			//var browselocation = gui.addFolder('Browse Location');
+			 
+			 gui.add(o, "Location");
+			 gui.add(o, "Search");
+
+			var parameters = gui.addFolder('parameters');
+
+			var pitch_control = parameters.add(o, 'elevation', -1000, 1000);
+			pitch_control.onChange(function(value) {
+				_elevation = value;
+				hyperlapse.elevation_offset = value;
+				changeHash();
+			});
+
+			var millis_control = parameters.add(o, 'millis', 10, 250);
+			millis_control.onChange(function(value) {
+				hyperlapse.millis = value;
+			});
+
+			parameters.open();
+			
+
+			var play_controls = gui.addFolder('play controls');
+			play_controls.add(hyperlapse, 'play');
+			play_controls.add(hyperlapse, 'pause');
+			play_controls.add(hyperlapse, 'next');
+			play_controls.add(hyperlapse, 'prev');
+			play_controls.open();
+
+			gui.add(o, 'drop_pins');
+			gui.add(o, 'generate');
+			gui.add(o, 'toggle_map');
+			gui.add(hyperlapse, 'load');
+
+
+			window.addEventListener('resize', function(){
+				hyperlapse.setSize(window.innerWidth, window.innerHeight);
+				o.screen_width = window.innerWidth;
+				o.screen_height = window.innerHeight;
+			}, false);
+
+			var show_ui = true;
+			document.addEventListener( 'keydown', onKeyDown, false );
+			function onKeyDown ( event ) {
+
+				switch( event.keyCode ) {
+					//case 72: /* H */
+					//	show_ui = !show_ui;
+					//	document.getElementById("controls").style.opacity = (show_ui)?1:0;
+					//	break;
+
+					case 190: /* > */
+						hyperlapse.next();
+						break;
+
+					case 188: /* < */
+						hyperlapse.prev();
+						break;
+				}
+
+			};
+
+			//o.generate();
+		}
+
+		window.onload = init;
+	</script> 
+</head> 
+<body> 
+	<div id="pano" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index:-1;"></div>
+	<div id="controls">
+		<div id="map" style="max-width: 40%; width: 430px; top: 12px; height: 430px; float: left; padding: 0;"></div>
+		<!--
+		<div id="controls" style="">
+			<form id="map_form">
+				<input type="text" name="address" id="address" />
+				<button type="submit" id="searchButton" >Search</button>
+			</form>
+		</div>
+		<-->
+	</div>
+	<div id="my-gui-container" style="position: absolute; top: 20px; left: 65%; max-width: 35%;">
+	</div>
+	<div id="buttons" style="position: absolute; top: 20px; left: 42%; max-width: 20%"> 
+		<button id="startpage" title="Try out the application by browsing any location you like"><i class="fa fa-home fa-2x"></i></button>
+		<button id="myRoadtrip" title="Plan your own roadtrip"><i class="fa fa-car fa-2x"></i></button>
+    	<button id="digitalTourism" title="Browse predefined road trips and tourist attractions"><i class="fa fa-plane fa-2x"></i></button>
+		<button id="myPosition" title="Go to my position"><i class="fa fa-street-view fa-2x"></i></button>
+	</div>
+	<div id="play-pause" style="position: absolute; top: 80px; left: 45.7%; max-width: 10%; opacity: 0">
+		<button id="play-pause-toggle" title="Play/Pause" style="background-color: Transparent; border: 0px"><i class="fa fa-pause fa-5x"></i></button>
+	</div>
+	<div id="text"></div>
+	
+</body> 
+<script>
+
+	var play = true;
+	
+	$("#startpage").click(function() {
+      window.location.href = "http://" + window.location.hostname ;
+    });
+
+    $("#myRoadtrip").click(function() {
+      window.location.href = "http://" + window.location.hostname + "/dev3/examples/viewer.html";
+    });
+
+    $("#digitalTourism").click(function() {
+      window.location.href = "http://" + window.location.hostname + "/dev3/examples/previewer.html";
+    });
+	
+	$("#myPosition").click(function() {
+		if(navigator.geolocation) {
+			browserSupportFlag = true;
+			navigator.geolocation.getCurrentPosition(function(position) {
+			var pos = new google.maps.LatLng(position.coords.latitude,
+                                       position.coords.longitude);
+
+			  map.setCenter(pos);
+			  o.drop_pins();
+			}, function() {
+			  handleNoGeolocation(browserSupportFlag);
+			});
+		  }
+		  // Browser doesn't support Geolocation
+		  else {
+			browserSupportFlag = false;
+			handleNoGeolocation(browserSupportFlag);
+		  }
+	});
+	
+	function handleNoGeolocation(errorFlag) {
+		if (errorFlag == true) {
+		  alert("Geolocation service failed.");
+		} else {
+		  alert("Your browser doesn't support geolocation. We've placed you in Siberia.");
+		}
+	  }
+	$("#play-pause-toggle").click(function() {
+		if(play) {
+			hyperlapse.pause();
+			$("#play-pause-toggle").html('<i class="fa fa-play fa-5x"></i>');
+		} else {
+			hyperlapse.play();
+			$("#play-pause-toggle").html('<i class="fa fa-pause fa-5x"></i>');
+		}
+		play = !play;
+	});
+</script>
+
+</html>
