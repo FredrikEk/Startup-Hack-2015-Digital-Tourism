@@ -119,8 +119,8 @@ var Hyperlapse = function(container, params) {
 		_listeners = [],
 		_container = container,
 		_params = params || {},
-		_w = _params.width || 800,
-		_h = _params.height || 400,
+		_w = _params.width || 2400,
+		_h = _params.height || 1700,
 		_d = 20,
 		_use_elevation = _params.use_elevation || false,
 		_distance_between_points = _params.distance_between_points || 1,
@@ -484,36 +484,43 @@ var Hyperlapse = function(container, params) {
 			_camera.lookAt( _camera.target );
 			_camera.rotation.z -= o_z;
 
+			_mesh.rotation.z = _origin_pitch.toRad();
+			
+			
+			//_scene.updateMatrixWorld();
+			
+			//if ( _camera.parent === null ) _camera.updateMatrixWorld();
+			
 			var eyeSeparation = 3;
 			var focalLength = 15;
 			
-			var _quaternion;
-			var _position;
-			var _scale;
+			var _position = new THREE.Vector3();
+			var _quaternion = new THREE.Quaternion();
+			var _scale = new THREE.Vector3();
 			
 			_camera.matrixWorld.decompose( _position, _quaternion, _scale );
 			
-			_fov = THREE.Math.radToDeg( 2 * Math.atan( Math.tan( THREE.Math.degToRad( camera.fov ) * 0.5 ) / camera.zoom ) );
+			var _fov = THREE.Math.radToDeg( 2 * Math.atan( Math.tan( THREE.Math.degToRad( _camera.fov ) * 0.5 ) / _zoom ) );
 
-			_ndfl = camera.near / focalLength;
-			_halfFocalHeight = Math.tan( THREE.Math.degToRad( _fov ) * 0.5 ) * focalLength;
-			_halfFocalWidth = _halfFocalHeight * 0.5 * camera.aspect;
+			var _ndfl = _camera.near / focalLength;
+			var _halfFocalHeight = Math.tan( THREE.Math.degToRad( _fov ) * 0.5 ) * focalLength;
+			var _halfFocalWidth = _halfFocalHeight * 0.5 * _camera.aspect;
 
-			_top = _halfFocalHeight * _ndfl;
-			_bottom = - _top;
-			_innerFactor = ( _halfFocalWidth + eyeSeparation / 2.0 ) / ( _halfFocalWidth * 2.0 );
-			_outerFactor = 1.0 - _innerFactor;
+			var _top = _halfFocalHeight * _ndfl;
+			var _bottom = - _top;
+			var _innerFactor = ( _halfFocalWidth + eyeSeparation / 2.0 ) / ( _halfFocalWidth * 2.0 );
+			var _outerFactor = 1.0 - _innerFactor;
 
-			_outer = _halfFocalWidth * 2.0 * _ndfl * _outerFactor;
-			_inner = _halfFocalWidth * 2.0 * _ndfl * _innerFactor;
+			var _outer = _halfFocalWidth * 2.0 * _ndfl * _outerFactor;
+			var _inner = _halfFocalWidth * 2.0 * _ndfl * _innerFactor;
 			
 			_cameraL.projectionMatrix.makeFrustum(
 				- _outer,
 				_inner,
 				_bottom,
 				_top,
-				camera.near,
-				camera.far
+				_camera.near,
+				_camera.far
 			);
 			
 			_cameraL.position.copy( _position );
@@ -526,31 +533,33 @@ var Hyperlapse = function(container, params) {
 				_outer,
 				_bottom,
 				_top,
-				camera.near,
-				camera.far
+				_camera.near,
+				_camera.far
 			);
 
 			_cameraR.position.copy( _position );
 			_cameraR.quaternion.copy( _quaternion );
-			_cameraR.translateX( this.eyeSeparation / 2.0 );
+			_cameraR.translateX( eyeSeparation / 2.0 );
 			
 			if(self.use_rotation_comp) {
 				_camera.rotation.z -= self.rotation_comp.toRad();
 			}
-			_mesh.rotation.z = _origin_pitch.toRad();
 			
-			renderer.clear();
-			renderer.enableScissorTest( true );
+			_renderer.render(_scene, _camera);
+			_renderer.clear();
+			_renderer.enableScissorTest( true );
+			
+			var _width2 = _w / 2;
+			
+			_renderer.setScissor( 0, 0, _width2, _h );
+			_renderer.setViewport( 0, 0, _width2, _h );
+			_renderer.render( _scene, _cameraL );
 
-			renderer.setScissor( 0, 0, _width, _height );
-			renderer.setViewport( 0, 0, _width, _height );
-			renderer.render( scene, _cameraL );
+			_renderer.setScissor( _width2, 0, _width2, _h );
+			_renderer.setViewport( _width2, 0, _width2, _h );
+			_renderer.render( _scene, _cameraR );
 
-			renderer.setScissor( _width, 0, _width, _height );
-			renderer.setViewport( _width, 0, _width, _height );
-			renderer.render( scene, _cameraR );
-
-			renderer.enableScissorTest( false );
+			_renderer.enableScissorTest( false );
 		}
 	};
 
@@ -728,7 +737,7 @@ var Hyperlapse = function(container, params) {
 	 * @param {Number} height
 	 */
 	this.setSize = function(width, height) {
-		_w = width / 2;
+		_w = width;
 		_h = height;
 		_renderer.setSize( _w, _h );
 		_camera.projectionMatrix.makePerspective( _fov, _w/_h, 1, 1100 );

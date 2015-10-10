@@ -147,11 +147,11 @@
 
 			hyperlapse = new Hyperlapse(pano, {
 				lookat: lookat_point,
-				fov: 80,
+				fov: 40,
 				millis: 50,
-				width: window.innerWidth,
-				height: window.innerHeight,
-				zoom: 2,
+				width: 1620,//window.innerWidth,
+				height: 1200,//window.innerHeight,
+				zoom: 0.5,
 				use_lookat: true,
 				distance_between_points: 1,
 				max_points: 1000,
@@ -433,7 +433,9 @@
 
 
 			window.addEventListener('resize', function(){
-				hyperlapse.setSize(window.innerWidth, window.innerHeight);
+				//hyperlapse.setSize(window.innerWidth, window.innerHeight);
+				hyperlapse.setSize(1620,1200);
+				$("#text").html("Test:" + "innerWidth: " + window.innerWidth + " " + window.outerWidth + " " +(window.innerWidth / window.innerHeight) + " Height: " + window.innerHeight);
 				o.screen_width = window.innerWidth;
 				o.screen_height = window.innerHeight;
 			}, false);
@@ -483,14 +485,15 @@
 	<div id="buttons" style="position: absolute; top: 20px; left: 42%; max-width: 20%"> 
 		<button id="startpage" title="Try out the application by browsing any location you like"><i class="fa fa-home fa-2x"></i></button>
 		<button id="myRoadtrip" title="Plan your own roadtrip"><i class="fa fa-car fa-2x"></i></button>
-    	<button id="digitalTourism" title="Browse predefined road trips and tourist attractions"><i class="fa fa-plane fa-2x"></i></button>
+    	<!--<button id="digitalTourism" title="Browse predefined road trips and tourist attractions"><i class="fa fa-plane fa-2x"></i></button><-->
+    	<button id="cardBox" title="Go to Google CardBox specific application"><i class="fa fa-plane fa-2x"></i></button>
 		<button id="myPosition" title="Go to my position"><i class="fa fa-street-view fa-2x"></i></button>
 	</div>
 	<div id="play-pause" style="position: absolute; top: 80px; left: 45.7%; max-width: 10%; opacity: 0">
 		<button id="play-pause-toggle" title="Play/Pause" style="background-color: Transparent; border: 0px"><i class="fa fa-pause fa-5x"></i></button>
 	</div>
-	<div id="text"></div>
-	
+	<div id="text" style="position: absolute; bottom: 10px;"> </div>
+	<script> $("#text").html("Test:" + "innerWidth: " + window.innerWidth + " " + window.outerWidth + " " +(window.innerWidth / window.innerHeight) + " Height: " + window.innerHeight); </script>
 </body> 
 <script>
 
@@ -504,8 +507,12 @@
       window.location.href = "http://" + window.location.hostname + "/dev3/examples/viewer.html";
     });
 
-    $("#digitalTourism").click(function() {
+    /*$("#digitalTourism").click(function() {
       window.location.href = "http://" + window.location.hostname + "/dev3/examples/previewer.html";
+    });*/
+
+	$("#cardBox").click(function() {
+      window.location.href = "http://" + window.location.hostname + "/dev3/examples/cardboard.html";
     });
 	
 	$("#myPosition").click(function() {
